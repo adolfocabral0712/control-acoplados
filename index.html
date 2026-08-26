@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <title>Control de Acoplados</title>
+  <style>
+    :root {
+      --fondo: #eef3f6;
+      --superficie: #ffffff;
+      --navy: #102b43;
+      --azul: #176da8;
+      --texto: #243746;
+      --muted: #6b7f8e;
+      --borde: #d8e3e9;
+      --verde: #087a4f;
+      --verde-bg: #ddf5e8;
+      --rojo: #ad1f2b;
+      --rojo-bg: #fde4e6;
+      --ambar: #8f5700;
+      --ambar-bg: #fff0cf;
+      --sombra: 0 8px 28px rgba(16, 43, 67, .07);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--fondo);
+      color: var(--texto);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .contenedor {
+      width: min(1520px, calc(100% - 36px));
+      margin: 0 auto;
+      padding: 28px 0 46px;
+    }
+
+    .encabezado {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--borde);
+    }
+
+    .sobre-titulo {
+      margin: 0 0 8px;
+      color: var(--azul);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .16em;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--navy);
+      font-size: clamp(31px, 4vw, 47px);
+      line-height: 1;
+      letter-spacing: -.04em;
+    }
+
+    .subtitulo {
+      margin: 11px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .actualizacion {
+      display: grid;
+      grid-template-columns: auto auto;
+      align-items: center;
+      justify-items: end;
+      gap: 7px 12px;
+      white-space: nowrap;
+    }
+
+    .actualizacion span {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .actualizacion strong { color: var(--navy); font-size: 14px; }
+
+    button, input, select { font: inherit; }
+
+    .btn {
+      grid-column: 1 / -1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-height: 35px;
+      margin-top: 3px;
+      padding: 7px 13px;
+      border: 1px solid #bfd0da;
+      border-radius: 7px;
+      background: var(--superficie);
+      color: var(--navy);
+      font-size: 12px;
+      font-weight: 750;
+      cursor: pointer;
+    }
+
+    .btn:hover { background: #f5f9fb; border-color: #96b1c0; }
+    .btn:disabled { opacity: .55; cursor: wait; }
+    .btn svg { width: 15px; height: 15px; }
+
+    .tarjetas {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 13px;
+      margin: 21px 0;
+    }
+
+    .tarjeta {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-height: 94px;
+      padding: 17px;
+      border: 1px solid var(--borde);
+      border-top: 4px solid var(--azul);
+      border-radius: 10px;
+      background: var(--superficie);
+      box-shadow: 0 4px 16px rgba(16, 43, 67, .04);
+    }
+
+    .tarjeta.ok { border-top-color: var(--verde); }
+    .tarjeta.revisar { border-top-color: var(--rojo); }
+    .tarjeta.sin-registro { border-top-color: var(--ambar); }
+    .tarjeta svg { width: 27px; color: var(--azul); flex: 0 0 auto; }
+    .tarjeta.ok svg { color: var(--verde); }
+    .tarjeta.revisar svg { color: var(--rojo); }
+    .tarjeta.sin-registro svg { color: var(--ambar); }
+
+    .tarjeta-contenido { display: flex; flex-direction: column; gap: 4px; }
+    .tarjeta-etiqueta { color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .055em; text-transform: uppercase; }
+    .tarjeta-valor { color: var(--navy); font-size: 30px; font-weight: 850; line-height: 1; }
+
+    .panel {
+      overflow: hidden;
+      border: 1px solid var(--borde);
+      border-radius: 10px;
+      background: var(--superficie);
+      box-shadow: var(--sombra);
+    }
+
+    .herramientas {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      border-bottom: 1px solid var(--borde);
+    }
+
+    .buscar { position: relative; width: min(480px, 100%); }
+    .buscar svg { position: absolute; top: 50%; left: 12px; width: 17px; color: var(--muted); transform: translateY(-50%); }
+
+    .campo, .selector {
+      width: 100%;
+      min-height: 39px;
+      border: 1px solid #cbd9e1;
+      border-radius: 7px;
+      background: #fff;
+      color: var(--texto);
+      outline: none;
+    }
+
+    .campo { padding: 8px 12px 8px 39px; }
+    .selector { width: 215px; padding: 8px 10px; cursor: pointer; }
+    .campo:focus, .selector:focus { border-color: var(--azul); box-shadow: 0 0 0 3px rgba(23, 109, 168, .12); }
+    .cantidad { margin-left: auto; color: var(--muted); font-size: 12px; font-weight: 750; white-space: nowrap; }
+
+    .tabla-contenedor { overflow-x: auto; }
+    table { width: 100%; min-width: 1000px; border-collapse: collapse; }
+    th { padding: 13px 14px; background: var(--navy); color: #fff; text-align: left; font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+    td { padding: 13px 14px; border-bottom: 1px solid #e7eef2; color: #425766; font-size: 13px; }
+    tbody tr { transition: background .12s ease; }
+    tbody tr:hover { background: #f2f8fb; }
+    tbody tr.con-alerta { background: #fffafb; }
+    tbody tr.con-alerta:hover { background: #fff2f3; }
+    .empresa { color: var(--navy); font-weight: 700; }
+    .matricula { color: var(--navy); font-family: Consolas, "Courier New", monospace; font-size: 14px; font-weight: 850; letter-spacing: .03em; white-space: nowrap; }
+    .matricula.registro { color: var(--azul); }
+
+    .estado {
+      display: inline-flex;
+      min-width: 113px;
+      justify-content: center;
+      padding: 6px 9px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .035em;
+      white-space: nowrap;
+    }
+
+    .estado-ok { color: var(--verde); background: var(--verde-bg); }
+    .estado-revisar { color: var(--rojo); background: var(--rojo-bg); }
+    .estado-sin-registro { color: var(--ambar); background: var(--ambar-bg); }
+
+    .mensaje {
+      display: flex;
+      min-height: 260px;
+      align-items: center;
+      justify-content: center;
+      gap: 11px;
+      padding: 30px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .mensaje.error { color: var(--rojo); }
+    .mensaje svg { width: 23px; flex: 0 0 auto; }
+    .girar { animation: girar 1s linear infinite; }
+    @keyframes girar { to { transform: rotate(360deg); } }
+    .oculto { display: none !important; }
+
+    @media (max-width: 900px) {
+      .encabezado { align-items: flex-start; flex-direction: column; }
+      .actualizacion { justify-items: start; }
+      .actualizacion .btn { grid-column: 3; grid-row: 1 / 3; margin: 0; }
+      .tarjetas { grid-template-columns: repeat(2, 1fr); }
+      .herramientas { flex-wrap: wrap; }
+      .buscar { width: 100%; }
+      .cantidad { margin-left: 0; }
+    }
+
+    @media (max-width: 560px) {
+      .contenedor { width: min(100% - 20px, 1520px); padding-top: 20px; }
+      .tarjetas { gap: 8px; }
+      .tarjeta { min-height: 84px; padding: 12px 10px; align-items: flex-start; }
+      .tarjeta svg { width: 21px; }
+      .tarjeta-etiqueta { font-size: 9px; }
+      .tarjeta-valor { font-size: 25px; }
+      .selector { width: 100%; }
+      .cantidad { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="contenedor">
+    <header class="encabezado">
+      <div>
+        <p class="sobre-titulo">LOGÍSTICA · CONTROL OPERATIVO</p>
+        <h1>Control de acoplados</h1>
+        <p class="subtitulo">Comparación entre el acoplado asignado y el último registro de la aplicación.</p>
+      </div>
+
+      <div class="actualizacion">
+        <span>Última actualización</span>
+        <strong id="actualizado">—</strong>
+        <button class="btn" id="btnActualizar" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 11a8.1 8.1 0 0 0-15.5-2M4 4v5h5M4 13a8.1 8.1 0 0 0 15.5 2M20 20v-5h-5"/></svg>
+          Actualizar
+        </button>
+      </div>
+    </header>
+
+    <section class="tarjetas" aria-label="Resumen">
+      <article class="tarjeta">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 17h4V5H2v12h3m9-6h4l4 4v2h-3m-9 0H8m-3 0a2 2 0 1 0 4 0 2 2 0 0 0-4 0Zm10 0a2 2 0 1 0 4 0 2 2 0 0 0-4 0Z"/></svg>
+        <div class="tarjeta-contenido"><span class="tarjeta-etiqueta">Total de equipos</span><strong class="tarjeta-valor" id="total">0</strong></div>
+      </article>
+      <article class="tarjeta ok">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>
+        <div class="tarjeta-contenido"><span class="tarjeta-etiqueta">Coincidencias OK</span><strong class="tarjeta-valor" id="totalOk">0</strong></div>
+      </article>
+      <article class="tarjeta revisar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 2 21h20L12 3Z"/><path d="M12 9v5m0 3h.01"/></svg>
+        <div class="tarjeta-contenido"><span class="tarjeta-etiqueta">Revisar diferencias</span><strong class="tarjeta-valor" id="totalRevisar">0</strong></div>
+      </article>
+      <article class="tarjeta sin-registro">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 12h8M12 8v8"/><circle cx="12" cy="12" r="9"/></svg>
+        <div class="tarjeta-contenido"><span class="tarjeta-etiqueta">Sin registro</span><strong class="tarjeta-valor" id="totalSinRegistro">0</strong></div>
+      </article>
+    </section>
+
+    <section class="panel">
+      <div class="herramientas">
+        <label class="buscar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+          <input class="campo" id="buscar" type="search" placeholder="Buscar empresa, camión o acoplado…" autocomplete="off">
+        </label>
+        <select class="selector" id="filtroEstado" aria-label="Filtrar por estado">
+          <option value="TODOS">Todos los estados</option>
+          <option value="OK">OK</option>
+          <option value="REVISAR/DIFERENCIA">Revisar / diferencia</option>
+          <option value="SIN REGISTRO">Sin registro</option>
+        </select>
+        <span class="cantidad" id="cantidad">0 registros</span>
+      </div>
+
+      <div class="mensaje" id="cargando">
+        <svg class="girar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12a8 8 0 1 1-5.5-7.6"/></svg>
+        Cargando control de acoplados…
+      </div>
+
+      <div class="mensaje error oculto" id="error"></div>
+      <div class="mensaje oculto" id="sinResultados">No hay registros para los filtros seleccionados.</div>
+
+      <div class="tabla-contenedor oculto" id="tablaContenedor">
+        <table>
+          <thead>
+            <tr>
+              <th>Empresa</th>
+              <th>Camión</th>
+              <th>Acoplado asignado</th>
+              <th>Último registro app</th>
+              <th>Fecha último registro</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="tabla"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const URL_JSON = "https://dl.dropbox.com/scl/fi/egtraxrocbu7j53h5o09s/ControlAcoplados.json?rlkey=bol33972pi6ij898l5tah4ngm&dl=1";
+
+    let registros = [];
+
+    const $ = (id) => document.getElementById(id);
+
+    function textoSeguro(valor) {
+      return valor === null || valor === undefined || String(valor).trim() === "" ? "—" : String(valor);
+    }
+
+    function escaparHTML(valor) {
+      return textoSeguro(valor)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function formatearFecha(valor) {
+      if (!valor) return "—";
+      const fecha = new Date(valor);
+      if (Number.isNaN(fecha.getTime())) return textoSeguro(valor);
+      return new Intl.DateTimeFormat("es-UY", {
+        day: "2-digit", month: "2-digit", year: "numeric",
+        hour: "2-digit", minute: "2-digit", hour12: false
+      }).format(fecha);
+    }
+
+    function claseEstado(estado) {
+      if (estado === "OK") return "estado-ok";
+      if (estado === "SIN REGISTRO") return "estado-sin-registro";
+      return "estado-revisar";
+    }
+
+    function actualizarTarjetas() {
+      $("total").textContent = registros.length;
+      $("totalOk").textContent = registros.filter(r => r.ESTADO === "OK").length;
+      $("totalRevisar").textContent = registros.filter(r => r.ESTADO === "REVISAR/DIFERENCIA").length;
+      $("totalSinRegistro").textContent = registros.filter(r => r.ESTADO === "SIN REGISTRO").length;
+    }
+
+    function filtrarYMostrar() {
+      const busqueda = $("buscar").value.trim().toUpperCase();
+      const estado = $("filtroEstado").value;
+
+      const filtrados = registros.filter(registro => {
+        const coincideEstado = estado === "TODOS" || registro.ESTADO === estado;
+        const campos = [registro.EMPRESA, registro.CAMION, registro.ACOPLADO, registro["ULTIMO REGISTRO APP"]];
+        const coincideBusqueda = !busqueda || campos.some(campo => String(campo ?? "").toUpperCase().includes(busqueda));
+        return coincideEstado && coincideBusqueda;
+      });
+
+      $("cantidad").textContent = `${filtrados.length} ${filtrados.length === 1 ? "registro" : "registros"}`;
+      $("tabla").innerHTML = filtrados.map(registro => {
+        const estadoActual = textoSeguro(registro.ESTADO);
+        const alerta = estadoActual === "OK" ? "" : "con-alerta";
+        return `
+          <tr class="${alerta}">
+            <td class="empresa">${escaparHTML(registro.EMPRESA)}</td>
+            <td class="matricula">${escaparHTML(registro.CAMION)}</td>
+            <td class="matricula">${escaparHTML(registro.ACOPLADO)}</td>
+            <td class="matricula registro">${escaparHTML(registro["ULTIMO REGISTRO APP"])}</td>
+            <td>${escaparHTML(formatearFecha(registro["FECHA ULTIMO REGISTRO"]))}</td>
+            <td><span class="estado ${claseEstado(estadoActual)}">${escaparHTML(estadoActual)}</span></td>
+          </tr>`;
+      }).join("");
+
+      $("sinResultados").classList.toggle("oculto", filtrados.length !== 0);
+      $("tablaContenedor").classList.toggle("oculto", filtrados.length === 0);
+    }
+
+    async function cargarDatos() {
+      const boton = $("btnActualizar");
+      boton.disabled = true;
+      boton.querySelector("svg").classList.add("girar");
+      $("error").classList.add("oculto");
+
+      if (!registros.length) {
+        $("cargando").classList.remove("oculto");
+        $("tablaContenedor").classList.add("oculto");
+      }
+
+      try {
+        const separador = URL_JSON.includes("?") ? "&" : "?";
+        const respuesta = await fetch(`${URL_JSON}${separador}t=${Date.now()}`, { cache: "no-store" });
+        if (!respuesta.ok) throw new Error(`La fuente respondió HTTP ${respuesta.status}`);
+
+        const datos = await respuesta.json();
+        registros = Array.isArray(datos.registros) ? datos.registros : [];
+        registros.sort((a, b) => String(a.CAMION ?? "").localeCompare(String(b.CAMION ?? ""), "es", { numeric: true }));
+
+        $("actualizado").textContent = formatearFecha(datos.actualizado);
+        actualizarTarjetas();
+        filtrarYMostrar();
+      } catch (error) {
+        $("tablaContenedor").classList.add("oculto");
+        $("sinResultados").classList.add("oculto");
+        $("error").classList.remove("oculto");
+        $("error").innerHTML = `<strong>No se pudieron cargar los datos.</strong><br>${escaparHTML(error.message || error)}`;
+      } finally {
+        $("cargando").classList.add("oculto");
+        boton.disabled = false;
+        boton.querySelector("svg").classList.remove("girar");
+      }
+    }
+
+    $("buscar").addEventListener("input", filtrarYMostrar);
+    $("filtroEstado").addEventListener("change", filtrarYMostrar);
+    $("btnActualizar").addEventListener("click", cargarDatos);
+    cargarDatos();
+  </script>
+</body>
+</html>
