@@ -7,20 +7,20 @@
   <title>Control de Acoplados</title>
   <style>
     :root {
-      --fondo: #eef3f6;
+      --fondo: #e9eff3;
       --superficie: #ffffff;
-      --navy: #102b43;
-      --azul: #176da8;
-      --texto: #243746;
-      --muted: #6b7f8e;
-      --borde: #d8e3e9;
-      --verde: #087a4f;
-      --verde-bg: #ddf5e8;
-      --rojo: #ad1f2b;
-      --rojo-bg: #fde4e6;
-      --ambar: #8f5700;
-      --ambar-bg: #fff0cf;
-      --sombra: 0 8px 28px rgba(16, 43, 67, .07);
+      --navy: #17324a;
+      --azul: #2d6f94;
+      --texto: #293d4d;
+      --muted: #667b89;
+      --borde: #d1dce3;
+      --verde: #376f63;
+      --verde-bg: #e1eee9;
+      --rojo: #934850;
+      --rojo-bg: #f4e5e7;
+      --ambar: #8b6829;
+      --ambar-bg: #f2ead9;
+      --sombra: 0 8px 28px rgba(23, 50, 74, .08);
     }
 
     * { box-sizing: border-box; }
@@ -131,7 +131,12 @@
       border-radius: 10px;
       background: var(--superficie);
       box-shadow: 0 4px 16px rgba(16, 43, 67, .04);
+      cursor: pointer;
+      transition: transform .15s ease, box-shadow .15s ease;
     }
+
+    .tarjeta:hover { transform: translateY(-2px); box-shadow: 0 9px 24px rgba(16, 43, 67, .12); }
+    .tarjeta:focus-visible { outline: 3px solid rgba(23, 109, 168, .28); outline-offset: 3px; }
 
     .tarjeta.ok { border-top-color: var(--verde); }
     .tarjeta.revisar { border-top-color: var(--rojo); }
@@ -181,8 +186,8 @@
 
     .tabla-contenedor { overflow-x: auto; }
     table { width: 100%; min-width: 1000px; border-collapse: collapse; }
-    th { padding: 13px 14px; background: var(--navy); color: #fff; text-align: left; font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
-    td { padding: 13px 14px; border-bottom: 1px solid #e7eef2; color: #425766; font-size: 13px; }
+    th { padding: 13px 14px; background: var(--navy); color: #fff; text-align: center; font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+    td { padding: 13px 14px; border-bottom: 1px solid #e7eef2; color: #425766; font-size: 13px; text-align: center; }
     tbody tr { transition: background .12s ease; }
     tbody tr:hover { background: #f2f8fb; }
     tbody tr.con-alerta { background: #fffafb; }
@@ -223,6 +228,44 @@
     .girar { animation: girar 1s linear infinite; }
     @keyframes girar { to { transform: rotate(360deg); } }
     .oculto { display: none !important; }
+
+    .modal-fondo {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 22px;
+      background: rgba(9, 28, 43, .58);
+      backdrop-filter: blur(2px);
+    }
+
+    .modal {
+      width: min(1260px, 96vw);
+      max-height: 88vh;
+      overflow: hidden;
+      border-radius: 12px;
+      background: var(--superficie);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, .25);
+    }
+
+    .modal-encabezado {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 17px 20px;
+      border-bottom: 1px solid var(--borde);
+    }
+
+    .modal-encabezado h2 { margin: 0; color: var(--navy); font-size: 21px; }
+    .modal-encabezado p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+    .modal-cerrar { width: 38px; height: 38px; border: 1px solid var(--borde); border-radius: 8px; background: #fff; color: var(--navy); font-size: 25px; line-height: 1; cursor: pointer; }
+    .modal-cerrar:hover { background: #f2f7fa; }
+    .modal-tabla { max-height: calc(88vh - 78px); overflow: auto; }
+    .comentario-alerta { color: var(--rojo); font-weight: 750; line-height: 1.35; }
+    body.modal-abierto { overflow: hidden; }
 
     @media (max-width: 900px) {
       .encabezado { align-items: flex-start; flex-direction: column; }
@@ -266,19 +309,19 @@
     </header>
 
     <section class="tarjetas" aria-label="Resumen">
-      <article class="tarjeta">
+      <article class="tarjeta" data-tarjeta="TODOS" role="button" tabindex="0">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 17h4V5H2v12h3m9-6h4l4 4v2h-3m-9 0H8m-3 0a2 2 0 1 0 4 0 2 2 0 0 0-4 0Zm10 0a2 2 0 1 0 4 0 2 2 0 0 0-4 0Z"/></svg>
         <div class="tarjeta-contenido"><span class="tarjeta-etiqueta">Total de equipos</span><strong class="tarjeta-valor" id="total">0</strong></div>
       </article>
-      <article class="tarjeta ok">
+      <article class="tarjeta ok" data-tarjeta="OK" role="button" tabindex="0">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>
         <div class="tarjeta-contenido"><span class="tarjeta-etiqueta">Coincidencias OK</span><strong class="tarjeta-valor" id="totalOk">0</strong></div>
       </article>
-      <article class="tarjeta revisar">
+      <article class="tarjeta revisar" data-tarjeta="REVISAR/DIFERENCIA" role="button" tabindex="0">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 2 21h20L12 3Z"/><path d="M12 9v5m0 3h.01"/></svg>
         <div class="tarjeta-contenido"><span class="tarjeta-etiqueta">Revisar diferencias</span><strong class="tarjeta-valor" id="totalRevisar">0</strong></div>
       </article>
-      <article class="tarjeta sin-registro">
+      <article class="tarjeta sin-registro" data-tarjeta="SIN REGISTRO" role="button" tabindex="0">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 12h8M12 8v8"/><circle cx="12" cy="12" r="9"/></svg>
         <div class="tarjeta-contenido"><span class="tarjeta-etiqueta">Sin registro</span><strong class="tarjeta-valor" id="totalSinRegistro">0</strong></div>
       </article>
@@ -325,6 +368,21 @@
     </section>
   </main>
 
+  <div class="modal-fondo oculto" id="modalFondo" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
+    <section class="modal">
+      <header class="modal-encabezado">
+        <div><h2 id="modalTitulo">Registros</h2><p id="modalCantidad">0 registros</p></div>
+        <button class="modal-cerrar" id="modalCerrar" type="button" aria-label="Cerrar">&times;</button>
+      </header>
+      <div class="modal-tabla">
+        <table>
+          <thead><tr><th>Empresa</th><th>Camión</th><th>Acoplado asignado</th><th>Último registro app</th><th>Fecha último registro</th><th>Estado</th><th id="modalComentarioTitulo" class="oculto">Comentario</th></tr></thead>
+          <tbody id="modalTabla"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
   <script>
     const URL_JSON = "https://dl.dropbox.com/scl/fi/egtraxrocbu7j53h5o09s/ControlAcoplados.json?rlkey=bol33972pi6ij898l5tah4ngm&dl=1";
 
@@ -352,7 +410,7 @@
       return new Intl.DateTimeFormat("es-UY", {
         day: "2-digit", month: "2-digit", year: "numeric",
         hour: "2-digit", minute: "2-digit", hour12: false
-      }).format(fecha);
+      }).format(fecha).replace(",", "");
     }
 
     function claseEstado(estado) {
@@ -398,6 +456,60 @@
       $("tablaContenedor").classList.toggle("oculto", filtrados.length === 0);
     }
 
+    function filaHTML(registro) {
+      const estadoActual = textoSeguro(registro.ESTADO);
+      return `<tr class="${estadoActual === "OK" ? "" : "con-alerta"}">
+        <td class="empresa">${escaparHTML(registro.EMPRESA)}</td>
+        <td class="matricula">${escaparHTML(registro.CAMION)}</td>
+        <td class="matricula">${escaparHTML(registro.ACOPLADO)}</td>
+        <td class="matricula registro">${escaparHTML(registro["ULTIMO REGISTRO APP"])}</td>
+        <td>${escaparHTML(formatearFecha(registro["FECHA ULTIMO REGISTRO"]))}</td>
+        <td><span class="estado ${claseEstado(estadoActual)}">${escaparHTML(estadoActual)}</span></td>
+      </tr>`;
+    }
+
+    function diasDesdeFecha(valor) {
+      if (!valor) return null;
+      const fecha = new Date(valor);
+      if (Number.isNaN(fecha.getTime())) return null;
+      return Math.floor((Date.now() - fecha.getTime()) / 86400000);
+    }
+
+    function filaModalHTML(registro, mostrarComentario) {
+      const estadoActual = textoSeguro(registro.ESTADO);
+      const dias = diasDesdeFecha(registro["FECHA ULTIMO REGISTRO"]);
+      const comentario = mostrarComentario && dias !== null && dias > 7
+        ? "Esperar a nuevo registro, puede ser anterior"
+        : "—";
+      return `<tr class="${estadoActual === "OK" ? "" : "con-alerta"}">
+        <td class="empresa">${escaparHTML(registro.EMPRESA)}</td>
+        <td class="matricula">${escaparHTML(registro.CAMION)}</td>
+        <td class="matricula">${escaparHTML(registro.ACOPLADO)}</td>
+        <td class="matricula registro">${escaparHTML(registro["ULTIMO REGISTRO APP"])}</td>
+        <td>${escaparHTML(formatearFecha(registro["FECHA ULTIMO REGISTRO"]))}</td>
+        <td><span class="estado ${claseEstado(estadoActual)}">${escaparHTML(estadoActual)}</span></td>
+        ${mostrarComentario ? `<td class="${comentario === "—" ? "" : "comentario-alerta"}">${escaparHTML(comentario)}</td>` : ""}
+      </tr>`;
+    }
+
+    function abrirModal(estado) {
+      const titulos = { TODOS: "Total de equipos", OK: "Coincidencias OK", "REVISAR/DIFERENCIA": "Revisar diferencias", "SIN REGISTRO": "Sin registro" };
+      const lista = estado === "TODOS" ? registros : registros.filter(r => r.ESTADO === estado);
+      const mostrarComentario = estado === "REVISAR/DIFERENCIA";
+      $("modalTitulo").textContent = titulos[estado] || "Registros";
+      $("modalCantidad").textContent = `${lista.length} ${lista.length === 1 ? "registro" : "registros"}`;
+      $("modalComentarioTitulo").classList.toggle("oculto", !mostrarComentario);
+      $("modalTabla").innerHTML = lista.map(registro => filaModalHTML(registro, mostrarComentario)).join("");
+      $("modalFondo").classList.remove("oculto");
+      document.body.classList.add("modal-abierto");
+      $("modalCerrar").focus();
+    }
+
+    function cerrarModal() {
+      $("modalFondo").classList.add("oculto");
+      document.body.classList.remove("modal-abierto");
+    }
+
     async function cargarDatos() {
       const boton = $("btnActualizar");
       boton.disabled = true;
@@ -436,6 +548,15 @@
     $("buscar").addEventListener("input", filtrarYMostrar);
     $("filtroEstado").addEventListener("change", filtrarYMostrar);
     $("btnActualizar").addEventListener("click", cargarDatos);
+    document.querySelectorAll("[data-tarjeta]").forEach(tarjeta => {
+      tarjeta.addEventListener("click", () => abrirModal(tarjeta.dataset.tarjeta));
+      tarjeta.addEventListener("keydown", e => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); abrirModal(tarjeta.dataset.tarjeta); }
+      });
+    });
+    $("modalCerrar").addEventListener("click", cerrarModal);
+    $("modalFondo").addEventListener("click", e => { if (e.target === $("modalFondo")) cerrarModal(); });
+    document.addEventListener("keydown", e => { if (e.key === "Escape") cerrarModal(); });
     cargarDatos();
   </script>
 </body>
