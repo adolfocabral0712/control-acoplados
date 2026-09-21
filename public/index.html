@@ -443,29 +443,45 @@
       return "estado-revisar";
     }
 
+    function saludoSegunHoraUruguay() {
+      const partes = new Intl.DateTimeFormat("es-UY", {
+        timeZone: "America/Montevideo",
+        hour: "numeric",
+        hourCycle: "h23"
+      }).formatToParts(new Date());
+      const horaUruguay = Number(partes.find(parte => parte.type === "hour")?.value ?? 0);
+
+      return horaUruguay < 12 ? "Buen día." : "Buenas tardes.";
+    }
+
     function enlaceCorreo(registro) {
       const destinatario = "logma@fas.com.uy";
       const asunto = "Acoplados - para revisar/verificar";
       const cuerpo = [
-        "Buen dia.",
+        saludoSegunHoraUruguay(),
         "",
-        "Diferencia entre planilla Cam y App usada por conductor.",
+        "Se detectó una diferencia entre la planilla CAM y la aplicación",
+        "utilizada por el conductor.",
         "",
-        `Empresa: ${textoSeguro(registro.EMPRESA)}`,
-        `Camión: ${textoSeguro(registro.CAMION)}`,
-        `Acoplado asignado: ${textoSeguro(registro.ACOPLADO)}`,
-        `Último registro app: ${textoSeguro(registro["ULTIMO REGISTRO APP"])}`,
-        `Fecha último registro: ${formatearFecha(registro["FECHA ULTIMO REGISTRO"])}`,
-        `Estado: ${textoSeguro(registro.ESTADO)}`,
+        "CONTROL DE ACOPLADOS",
+        "────────────────────────────────",
+        `Empresa:                 ${textoSeguro(registro.EMPRESA)}`,
+        `Camión:                  ${textoSeguro(registro.CAMION)}`,
+        `Acoplado asignado:       ${textoSeguro(registro.ACOPLADO)}`,
+        `Último registro App:     ${textoSeguro(registro["ULTIMO REGISTRO APP"])}`,
+        `Fecha último registro:   ${formatearFecha(registro["FECHA ULTIMO REGISTRO"])}`,
+        `Estado:                  ${textoSeguro(registro.ESTADO)}`,
+        "────────────────────────────────",
         "",
-        "Sds."
+        "Saludos, Adolfo."
       ].join("\r\n");
 
       return `mailto:${destinatario}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
     }
 
     function botonCorreoHTML(registro) {
-      return `<a class="btn-correo" href="${escaparHTML(enlaceCorreo(registro))}" aria-label="Enviar por correo los datos de ${escaparHTML(registro.CAMION)}">
+      const datosCorreo = encodeURIComponent(JSON.stringify(registro));
+      return `<a class="btn-correo" href="${escaparHTML(enlaceCorreo(registro))}" data-correo="${escaparHTML(datosCorreo)}" aria-label="Enviar por correo los datos de ${escaparHTML(registro.CAMION)}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="m4 6 8 7 8-7"/></svg>
         Enviar
       </a>`;
@@ -603,6 +619,17 @@
     $("buscar").addEventListener("input", filtrarYMostrar);
     $("filtroEstado").addEventListener("change", filtrarYMostrar);
     $("btnActualizar").addEventListener("click", cargarDatos);
+    document.addEventListener("click", evento => {
+      const botonCorreo = evento.target.closest(".btn-correo");
+      if (!botonCorreo) return;
+
+      try {
+        const registro = JSON.parse(decodeURIComponent(botonCorreo.dataset.correo));
+        botonCorreo.href = enlaceCorreo(registro);
+      } catch (error) {
+        console.error("No se pudo actualizar el correo", error);
+      }
+    });
     document.querySelectorAll("[data-tarjeta]").forEach(tarjeta => {
       tarjeta.addEventListener("click", () => abrirModal(tarjeta.dataset.tarjeta));
       tarjeta.addEventListener("keydown", e => {
