@@ -196,6 +196,29 @@
     .matricula { color: var(--navy); font-family: Consolas, "Courier New", monospace; font-size: 14px; font-weight: 850; letter-spacing: .03em; white-space: nowrap; }
     .matricula.registro { color: var(--azul); }
 
+    .btn-correo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-width: 82px;
+      min-height: 32px;
+      padding: 6px 10px;
+      border: 1px solid #b9ccd8;
+      border-radius: 7px;
+      background: #f7fbfd;
+      color: var(--navy);
+      font-size: 11px;
+      font-weight: 800;
+      text-decoration: none;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .btn-correo:hover { background: #e8f2f7; border-color: var(--azul); }
+    .btn-correo:focus-visible { outline: 3px solid rgba(45, 111, 148, .22); outline-offset: 2px; }
+    .btn-correo svg { width: 15px; height: 15px; flex: 0 0 auto; }
+
     .estado {
       display: inline-flex;
       min-width: 113px;
@@ -354,6 +377,7 @@
         <table>
           <thead>
             <tr>
+              <th>Correo</th>
               <th>Empresa</th>
               <th>Camión</th>
               <th>Acoplado asignado</th>
@@ -376,7 +400,7 @@
       </header>
       <div class="modal-tabla">
         <table>
-          <thead><tr><th>Empresa</th><th>Camión</th><th>Acoplado asignado</th><th>Último registro app</th><th>Fecha último registro</th><th>Estado</th><th id="modalComentarioTitulo" class="oculto">Comentario</th></tr></thead>
+          <thead><tr><th>Correo</th><th>Empresa</th><th>Camión</th><th>Acoplado asignado</th><th>Último registro app</th><th>Fecha último registro</th><th>Estado</th><th id="modalComentarioTitulo" class="oculto">Comentario</th></tr></thead>
           <tbody id="modalTabla"></tbody>
         </table>
       </div>
@@ -419,6 +443,34 @@
       return "estado-revisar";
     }
 
+    function enlaceCorreo(registro) {
+      const destinatario = "logma@fas.com.uy";
+      const asunto = "Acoplados - para revisar/verificar";
+      const cuerpo = [
+        "Buen dia.",
+        "",
+        "Diferencia entre planilla Cam y App usada por conductor.",
+        "",
+        `Empresa: ${textoSeguro(registro.EMPRESA)}`,
+        `Camión: ${textoSeguro(registro.CAMION)}`,
+        `Acoplado asignado: ${textoSeguro(registro.ACOPLADO)}`,
+        `Último registro app: ${textoSeguro(registro["ULTIMO REGISTRO APP"])}`,
+        `Fecha último registro: ${formatearFecha(registro["FECHA ULTIMO REGISTRO"])}`,
+        `Estado: ${textoSeguro(registro.ESTADO)}`,
+        "",
+        "Sds."
+      ].join("\r\n");
+
+      return `mailto:${destinatario}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
+    }
+
+    function botonCorreoHTML(registro) {
+      return `<a class="btn-correo" href="${escaparHTML(enlaceCorreo(registro))}" aria-label="Enviar por correo los datos de ${escaparHTML(registro.CAMION)}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="m4 6 8 7 8-7"/></svg>
+        Enviar
+      </a>`;
+    }
+
     function actualizarTarjetas() {
       $("total").textContent = registros.length;
       $("totalOk").textContent = registros.filter(r => r.ESTADO === "OK").length;
@@ -443,6 +495,7 @@
         const alerta = estadoActual === "OK" ? "" : "con-alerta";
         return `
           <tr class="${alerta}">
+            <td>${botonCorreoHTML(registro)}</td>
             <td class="empresa">${escaparHTML(registro.EMPRESA)}</td>
             <td class="matricula">${escaparHTML(registro.CAMION)}</td>
             <td class="matricula">${escaparHTML(registro.ACOPLADO)}</td>
@@ -459,6 +512,7 @@
     function filaHTML(registro) {
       const estadoActual = textoSeguro(registro.ESTADO);
       return `<tr class="${estadoActual === "OK" ? "" : "con-alerta"}">
+        <td>${botonCorreoHTML(registro)}</td>
         <td class="empresa">${escaparHTML(registro.EMPRESA)}</td>
         <td class="matricula">${escaparHTML(registro.CAMION)}</td>
         <td class="matricula">${escaparHTML(registro.ACOPLADO)}</td>
@@ -482,6 +536,7 @@
         ? "Esperar a nuevo registro, puede ser anterior"
         : "—";
       return `<tr class="${estadoActual === "OK" ? "" : "con-alerta"}">
+        <td>${botonCorreoHTML(registro)}</td>
         <td class="empresa">${escaparHTML(registro.EMPRESA)}</td>
         <td class="matricula">${escaparHTML(registro.CAMION)}</td>
         <td class="matricula">${escaparHTML(registro.ACOPLADO)}</td>
