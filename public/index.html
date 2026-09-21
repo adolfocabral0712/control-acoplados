@@ -458,7 +458,7 @@
         `Fecha último registro: ${formatearFecha(registro["FECHA ULTIMO REGISTRO"])}`,
         `Estado: ${textoSeguro(registro.ESTADO)}`,
         "",
-        "Saludos, Adolfo."
+        "Sds."
       ].join("\r\n");
 
       return `mailto:${destinatario}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
